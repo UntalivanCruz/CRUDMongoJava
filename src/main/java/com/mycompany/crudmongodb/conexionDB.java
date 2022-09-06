@@ -6,6 +6,10 @@ package com.mycompany.crudmongodb;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientException;
 import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.DBObject;
+//Prueba de insertar un objeto a la Coleccion Equipos
+//import com.mongodb.BasicDBObject;
 import java.util.List;
 /**
  *
@@ -16,6 +20,10 @@ public class conexionDB {
     String servidor="localhost";
     Integer puerto=27017;
 
+    DB dataBaseSelect;
+
+//Catalogo de Colecciones
+    DBCollection Equipos;
 //constructor
     public conexionDB(){
        try{
@@ -31,7 +39,20 @@ public class conexionDB {
         List<String> listDB = conn.getDatabaseNames();
         System.out.println("Bases de datos disponibles: " + listDB);
 
-      DB dataBaseSelect = conn.getDB("dbLigaNacional");
+       dataBaseSelect = conn.getDB("dbLigaNacional");
        System.out.println("DB Selecionada: " + dataBaseSelect.toString());
+       
+    }
+
+    public boolean setEquipos(DBObject newEquipo){
+        Equipos = dataBaseSelect.getCollection("equipos");
+        Equipos.insert(newEquipo);
+
+//Prueba de insertar un objeto a la Coleccion Equipos
+ /*      Equipos.insert(new BasicDBObject("nombre","Marathon")
+            .append("sede","SPS")
+            .append("fundacion","1960")
+        );*/
+        return true;
     }
 }
