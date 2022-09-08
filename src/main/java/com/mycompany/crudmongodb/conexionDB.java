@@ -3,11 +3,12 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.mycompany.crudmongodb;
-import com.mongodb.MongoClient;
+
 import com.mongodb.MongoClientException;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
+
 import com.mongodb.DBObject;
+import com.mongodb.client.*;
+import org.bson.Document;
 //Prueba de insertar un objeto a la Coleccion Equipos
 //import com.mongodb.BasicDBObject;
 import java.util.List;
@@ -21,44 +22,44 @@ public class conexionDB {
     String servidor="localhost";
     Integer puerto=27017;
 
-    DB dataBaseSelect;
+    MongoDatabase dataBaseSelect;
 
 //Catalogo de Colecciones
-    DBCollection Equipos;
+    MongoCollection<Document> Equipos;
 //constructor
     public conexionDB(){
        try{
-           conn = new MongoClient(servidor,puerto);
+           this.conn = MongoClients.create("mongodb://"+servidor+":"+ puerto.toString());
            System.out.println("Conexion exitosa");
        }catch(MongoClientException error){
            System.out.println("Error en conexion: " + error.toString());
        }
     }
 
-   public void mostrarBD(){
-      //Informativo
-        List<String> listDB = conn.getDatabaseNames();
-        System.out.println("Bases de datos disponibles: " + listDB);
-
-       dataBaseSelect = conn.getDB("dbLigaNacional");
+   public void setBD(){
+       dataBaseSelect = conn.getDatabase("dbLigaNacional");
        System.out.println("DB Selecionada: " + dataBaseSelect.toString());
-       
+       this.Equipos = this.dataBaseSelect.getCollection("equipos");
     }
 
     public boolean setEquipos(DBObject newEquipo){
-        Equipos = dataBaseSelect.getCollection("equipos");
        try{
-            Equipos.insert(newEquipo);
+          //  this.Equipos.insert(newEquipo);
             JOptionPane.showMessageDialog(null, "Registro creado con exito!","Importante!",JOptionPane.INFORMATION_MESSAGE);
+            return true;
+        }catch(MongoClientException error){
+            JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+    }
+
+    public FindIterable<Document> getEquipos(){
+        FindIterable<Document> iterable =null;
+        try{
+           iterable  = this.Equipos.find();
         }catch(MongoClientException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
         }
-
-//Prueba de insertar un objeto a la Coleccion Equipos
- /*      Equipos.insert(new BasicDBObject("nombre","Marathon")
-            .append("sede","SPS")
-            .append("fundacion","1960")
-        );*/
-        return true;
+        return iterable;
     }
 }

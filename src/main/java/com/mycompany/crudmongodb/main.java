@@ -17,7 +17,7 @@ public class main {
     public static void main(String[] args) {
         // TODO code application logic here
         connMongo = new conexionDB();
-        connMongo.mostrarBD();
+        connMongo.setBD();
 
         equipos formEquipos = new equipos();
         formEquipos.setVisible(true);

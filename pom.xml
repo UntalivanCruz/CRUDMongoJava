@@ -11,6 +11,12 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.11</version>
         </dependency>
+        <dependency>
+            <groupId>org.mongodb</groupId>
+            <artifactId>bson</artifactId>
+            <version>4.6.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
