@@ -11,6 +11,7 @@ import com.mongodb.DBObject;
 //Prueba de insertar un objeto a la Coleccion Equipos
 //import com.mongodb.BasicDBObject;
 import java.util.List;
+import javax.swing.JOptionPane;
 /**
  *
  * @author Developer
@@ -46,7 +47,12 @@ public class conexionDB {
 
     public boolean setEquipos(DBObject newEquipo){
         Equipos = dataBaseSelect.getCollection("equipos");
-        Equipos.insert(newEquipo);
+       try{
+            Equipos.insert(newEquipo);
+            JOptionPane.showMessageDialog(null, "Registro creado con exito!","Importante!",JOptionPane.INFORMATION_MESSAGE);
+        }catch(MongoClientException error){
+            JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
+        }
 
 //Prueba de insertar un objeto a la Coleccion Equipos
  /*      Equipos.insert(new BasicDBObject("nombre","Marathon")

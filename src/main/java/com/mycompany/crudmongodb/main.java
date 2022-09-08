@@ -3,24 +3,24 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package com.mycompany.crudmongodb;
-import com.mongodb.DBObject;
+
 
 /**
  *
  * @author Developer
  */
 public class main {
-
+    static conexionDB connMongo;
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        conexionDB conn1 = new conexionDB();
-        conn1.mostrarBD();
+        connMongo = new conexionDB();
+        connMongo.mostrarBD();
+
         equipos formEquipos = new equipos();
-        DBObject registros= formEquipos.getForm();
-        conn1.setEquipos(registros);
+        formEquipos.setVisible(true);
     }
     
 }
