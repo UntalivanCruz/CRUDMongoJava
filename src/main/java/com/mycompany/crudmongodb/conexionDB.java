@@ -9,6 +9,7 @@ import com.mongodb.MongoClientException;
 import com.mongodb.DBObject;
 import com.mongodb.client.*;
 import org.bson.Document;
+import org.bson.BasicBSONObject;
 //Prueba de insertar un objeto a la Coleccion Equipos
 //import com.mongodb.BasicDBObject;
 import java.util.List;
@@ -42,9 +43,9 @@ public class conexionDB {
        this.Equipos = this.dataBaseSelect.getCollection("equipos");
     }
 
-    public boolean setEquipos(DBObject newEquipo){
+    public boolean setEquipos(Document newEquipo){
        try{
-          //  this.Equipos.insert(newEquipo);
+            this.Equipos.insertOne(newEquipo);
             JOptionPane.showMessageDialog(null, "Registro creado con exito!","Importante!",JOptionPane.INFORMATION_MESSAGE);
             return true;
         }catch(MongoClientException error){
@@ -54,6 +55,16 @@ public class conexionDB {
     }
 
     public FindIterable<Document> getEquipos(){
+        FindIterable<Document> iterable =null;
+        try{
+           iterable  = this.Equipos.find();
+        }catch(MongoClientException error){
+            JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
+        }
+        return iterable;
+    }
+
+ public FindIterable<Document> getEquipoInsertado(){
         FindIterable<Document> iterable =null;
         try{
            iterable  = this.Equipos.find();

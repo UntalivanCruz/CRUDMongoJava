@@ -3,8 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
  */
 package com.mycompany.crudmongodb;
-import com.mongodb.DBObject;
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
 import javax.swing.table.DefaultTableModel;
 import com.mongodb.client.*;
 import org.bson.Document;
@@ -20,20 +19,51 @@ public class equipos extends javax.swing.JFrame {
     public equipos() {
         initComponents();
         this.modelEquipos = new DefaultTableModel();
+        this.modelEquipos.addColumn("Id");
         this.modelEquipos.addColumn("Nombre");
         this.modelEquipos.addColumn("Sede");
         this.modelEquipos.addColumn("Fundacion");
+        
+        this.llenarTabla();
+//ocultar el ID de la tabla
+        this.tblEquipos.getColumnModel().getColumn(0).setMinWidth(0);
+        this.tblEquipos.getColumnModel().getColumn(0).setMaxWidth(0);
+    }
 
+    private void llenarTabla(){
         this.tblEquipos.setModel(this.modelEquipos);
         MongoCursor<Document> cursor = main.connMongo.getEquipos().iterator();
-            System.out.println("Equipos list with a cursor: ");
             while (cursor.hasNext()) {
-                System.out.println(cursor.next().getString("sede").toString());
-
-//                this.modelEquipos.addRow();
+                Document documento = cursor.next();
+                this.agregarRegistrosTabla(documento);
             }
     }
 
+   private void agregarRegistrosTabla(Document fila){
+       String id = fila.get("_id").toString();
+       String nombre = fila.get("nombre").toString();
+       String sede=fila.get("sede").toString();
+       String fundacion=fila.get("fundacion").toString();
+       this.modelEquipos.addRow(new Object[]{id,nombre,sede,fundacion});
+ }
+
+    public void insertarDatos(){
+       Document datosObj = new Document("nombre",txtNombre.getText().toString())
+            .append("sede",txtSede.getText().toString())
+            .append("fundacion", Integer.parseInt(txtFundacion.getText()));
+        
+       if(main.connMongo.setEquipos(datosObj)){
+           this.limpiarForm();
+           this.agregarRegistrosTabla(datosObj);
+        }
+    }
+
+    public void limpiarForm(){
+        txtNombre.setText("");
+        txtFundacion.setText("");
+        txtSede.setText("");
+        txtNombre.requestFocus();
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -168,21 +198,6 @@ public class equipos extends javax.swing.JFrame {
         });
     }
 
-    public void insertarDatos(){
-       DBObject datosObj = new BasicDBObject("nombre",txtNombre.getText())
-            .append("sede",txtSede.getText())
-            .append("fundacion", Integer.parseInt(txtFundacion.getText()));
-       if(main.connMongo.setEquipos(datosObj)){
-            this.limpiarForm();
-        }
-    }
-
-    public void limpiarForm(){
-        txtNombre.setText("");
-        txtFundacion.setText("");
-        txtSede.setText("");
-        txtNombre.requestFocus();
-    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton jButton1;
