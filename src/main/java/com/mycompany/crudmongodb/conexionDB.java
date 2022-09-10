@@ -9,9 +9,13 @@ import com.mongodb.MongoClientException;
 import com.mongodb.DBObject;
 import com.mongodb.client.*;
 import org.bson.Document;
-import org.bson.BasicBSONObject;
-//Prueba de insertar un objeto a la Coleccion Equipos
-//import com.mongodb.BasicDBObject;
+
+import org.bson.conversions.Bson;
+import com.mongodb.client.result.DeleteResult;
+import static com.mongodb.client.model.Filters.*;
+import static com.mongodb.client.model.Updates.*;
+import com.mongodb.client.result.UpdateResult;
+
 import java.util.List;
 import javax.swing.JOptionPane;
 /**
@@ -72,5 +76,32 @@ public class conexionDB {
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
         }
         return iterable;
+    }
+
+public boolean deleteEquipos(String id){
+        try{
+            // delete one document
+            Bson filter = eq("nombre",id);
+            Document doc = this.Equipos.findOneAndDelete(filter);
+            return true;
+        }catch(MongoClientException error){
+            JOptionPane.showMessageDialog(null, "Registro no pudo ser eliminado","Importante!", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+}
+
+    public boolean actualizarEquipos(Document data,String id){
+            try{
+                        Bson filter = eq("_id", id);
+                        Bson updateOperation = set("nombre",data.getString("nombre"));
+                        UpdateResult updateResult = this.Equipos.updateOne(filter, updateOperation);
+                        System.out.println("=> Updating the doc with {\"student_id\":10000}. Adding comment.");
+              //          System.out.println(this.Equipos.find(filter).first().toJson(prettyPrint));
+                        System.out.println(updateResult);
+                    return true;
+            }catch(MongoClientException error){
+                        JOptionPane.showMessageDialog(null, "Registro no pudo ser actualizado","Importante!", JOptionPane.ERROR_MESSAGE);
+                        return false;
+            }
     }
 }
