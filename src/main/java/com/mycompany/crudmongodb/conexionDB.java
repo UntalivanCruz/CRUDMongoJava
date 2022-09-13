@@ -4,20 +4,22 @@
  */
 package com.mycompany.crudmongodb;
 
-import com.mongodb.MongoClientException;
-
-import com.mongodb.DBObject;
+import com.mongodb.MongoException;
 import com.mongodb.client.*;
-import org.bson.Document;
-
-import org.bson.conversions.Bson;
-import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.*;
-import com.mongodb.client.result.UpdateResult;
+import com.mongodb.client.model.ReplaceOptions;
+//import com.mongodb.client.result.UpdateResult;
+
+import org.bson.Document;
+import org.bson.types.ObjectId;
+import org.bson.conversions.Bson;
+import org.bson.json.JsonWriterSettings;
 
 import java.util.List;
 import javax.swing.JOptionPane;
+
 /**
  *
  * @author Developer
@@ -36,7 +38,7 @@ public class conexionDB {
        try{
            this.conn = MongoClients.create("mongodb://"+servidor+":"+ puerto.toString());
            System.out.println("Conexion exitosa");
-       }catch(MongoClientException error){
+       }catch(MongoException error){
            System.out.println("Error en conexion: " + error.toString());
        }
     }
@@ -52,7 +54,7 @@ public class conexionDB {
             this.Equipos.insertOne(newEquipo);
             JOptionPane.showMessageDialog(null, "Registro creado con exito!","Importante!",JOptionPane.INFORMATION_MESSAGE);
             return true;
-        }catch(MongoClientException error){
+        }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -62,7 +64,7 @@ public class conexionDB {
         FindIterable<Document> iterable =null;
         try{
            iterable  = this.Equipos.find();
-        }catch(MongoClientException error){
+        }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
         }
         return iterable;
@@ -72,7 +74,7 @@ public class conexionDB {
         FindIterable<Document> iterable =null;
         try{
            iterable  = this.Equipos.find();
-        }catch(MongoClientException error){
+        }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
         }
         return iterable;
@@ -81,10 +83,11 @@ public class conexionDB {
 public boolean deleteEquipos(String id){
         try{
             // delete one document
-            Bson filter = eq("nombre",id);
-            Document doc = this.Equipos.findOneAndDelete(filter);
-            return true;
-        }catch(MongoClientException error){
+            Bson filter = eq("_id",new ObjectId(id));
+       //     Document doc = this.Equipos.findOneAndDelete(filter);
+            DeleteResult result = this.Equipos.deleteOne(filter);
+            return result.getDeletedCount()>0 ? true : false;
+        }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser eliminado","Importante!", JOptionPane.ERROR_MESSAGE);
             return false;
         }
@@ -92,14 +95,10 @@ public boolean deleteEquipos(String id){
 
     public boolean actualizarEquipos(Document data,String id){
             try{
-                        Bson filter = eq("_id", id);
-                        Bson updateOperation = set("nombre",data.getString("nombre"));
-                        UpdateResult updateResult = this.Equipos.updateOne(filter, updateOperation);
-                        System.out.println("=> Updating the doc with {\"student_id\":10000}. Adding comment.");
-              //          System.out.println(this.Equipos.find(filter).first().toJson(prettyPrint));
-                        System.out.println(updateResult);
-                    return true;
-            }catch(MongoClientException error){
+                        Bson filter = eq("_id", new ObjectId(id));
+                        UpdateResult updateResult = this.Equipos.replaceOne(filter, data);
+                    return updateResult.getModifiedCount()>0 ? true : false;
+            }catch(MongoException error){
                         JOptionPane.showMessageDialog(null, "Registro no pudo ser actualizado","Importante!", JOptionPane.ERROR_MESSAGE);
                         return false;
             }

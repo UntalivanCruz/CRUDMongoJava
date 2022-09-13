@@ -7,6 +7,8 @@ import org.bson.Document;
 import javax.swing.table.DefaultTableModel;
 import com.mongodb.client.*;
 import org.bson.Document;
+import org.bson.types.ObjectId;
+
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 /**
@@ -51,10 +53,11 @@ public class equipos extends javax.swing.JFrame {
  }
 
     public void insertarDatos(){
-       Document datosObj = new Document("nombre",txtNombre.getText().toString())
+       Document datosObj = new Document("_id",new ObjectId())
+            .append("nombre",txtNombre.getText().toString())
             .append("sede",txtSede.getText().toString())
             .append("fundacion", Integer.parseInt(txtFundacion.getText()));
-        
+ 
        if(main.connMongo.setEquipos(datosObj)){
            this.limpiarForm();
            this.agregarRegistrosTabla(datosObj);
@@ -85,7 +88,7 @@ public class equipos extends javax.swing.JFrame {
         txtSede = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblEquipos = new javax.swing.JTable();
-        jButton2 = new javax.swing.JButton();
+        btnModificar = new javax.swing.JButton();
         btnEliminar = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -111,9 +114,19 @@ public class equipos extends javax.swing.JFrame {
 
             }
         ));
+        tblEquipos.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblEquiposMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblEquipos);
 
-        jButton2.setText("Modificar");
+        btnModificar.setText("Modificar");
+        btnModificar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnModificarActionPerformed(evt);
+            }
+        });
 
         btnEliminar.setText("Eliminar");
         btnEliminar.addActionListener(new java.awt.event.ActionListener() {
@@ -147,7 +160,7 @@ public class equipos extends javax.swing.JFrame {
                                     .addComponent(txtSede, javax.swing.GroupLayout.PREFERRED_SIZE, 197, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(79, 79, 79)
-                                .addComponent(jButton2)
+                                .addComponent(btnModificar)
                                 .addGap(80, 80, 80)
                                 .addComponent(btnEliminar)))
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -172,7 +185,7 @@ public class equipos extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1)
-                    .addComponent(jButton2)
+                    .addComponent(btnModificar)
                     .addComponent(btnEliminar))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 359, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -194,14 +207,66 @@ public class equipos extends javax.swing.JFrame {
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
                     new Object[] { "Si", "No" }, JOptionPane.YES_OPTION);
 
-        System.out.println((res==JOptionPane.YES_OPTION && this.deleteTablePersonas())? "Registro eliminado con exito!":"Registro no pudo ser eliminado!");
+        JOptionPane.showMessageDialog(null, (res==JOptionPane.YES_OPTION && this.deleteTablePersonas())? "Registro eliminado con exito!":"Registro no pudo ser eliminado!");
       
     }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
+        // TODO add your handling code here:
+int res = JOptionPane.showOptionDialog(new JFrame(), "Esta seguro que desea actualizar el registro seleccionado?", 
+                    "Confirmacion de actualizacion",
+                    JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                    new Object[] { "Si", "No" }, JOptionPane.YES_OPTION);
+
+        int posicion = this.tblEquipos.getSelectedRow();
+        if(posicion>=0 && res==JOptionPane.YES_OPTION ){
+           int nCol = this.modelEquipos.getColumnCount();
+           String[] dataTabla = new String[nCol];
+           for(int i=0;i<nCol;i++){
+            dataTabla[i]=this.modelEquipos.getValueAt(posicion, i).toString();
+           }
+
+           Document datosObj = new Document("nombre",this.txtNombre.getText())
+            .append("sede",this.txtSede.getText())
+            .append("fundacion", Integer.parseInt(this.txtFundacion.getText()));
+           
+           JOptionPane.showMessageDialog(null, main.connMongo.actualizarEquipos(datosObj,dataTabla[0])?"Registro Actualizado con exito":"Registro no pudo ser actualizado");
+          
+           this.modelEquipos.setValueAt(this.txtNombre.getText(), posicion, 1);
+           this.modelEquipos.setValueAt(this.txtSede.getText(), posicion, 2);
+           this.modelEquipos.setValueAt(this.txtFundacion.getText(), posicion, 3);
+           this.limpiarForm();
+           this.tblEquipos.clearSelection();
+      
+        }else{
+           JOptionPane.showMessageDialog(null, "Seleccione un registro de la tabla");
+        }
+
+    }//GEN-LAST:event_btnModificarActionPerformed
+
+    private void tblEquiposMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblEquiposMouseClicked
+        // TODO add your handling code here:
+        int posicion = this.tblEquipos.getSelectedRow();
+        if(posicion>=0){
+           int nCol = this.modelEquipos.getColumnCount();
+           String[] dataTabla = new String[nCol];
+           for(int i=0;i<nCol;i++){
+            dataTabla[i]=this.modelEquipos.getValueAt(posicion, i).toString();
+           }
+
+           this.txtNombre.setText(dataTabla[1]);
+           this.txtSede.setText(dataTabla[2]);
+           this.txtFundacion.setText(dataTabla[3]);
+
+        }else{
+           JOptionPane.showMessageDialog(null, "Seleccione otro registro de la tabla");
+        }
+    }//GEN-LAST:event_tblEquiposMouseClicked
 
 public boolean deleteTablePersonas(){
      int posicion = this.tblEquipos.getSelectedRow();
      if(posicion>=0){
-        String id=this.modelEquipos.getValueAt(posicion, 1).toString();
+        String id=this.modelEquipos.getValueAt(posicion, 0).toString();     
         this.modelEquipos.removeRow(posicion);
         main.connMongo.deleteEquipos(id);
         return true;
@@ -247,8 +312,8 @@ public boolean deleteTablePersonas(){
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnEliminar;
+    private javax.swing.JButton btnModificar;
     private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
