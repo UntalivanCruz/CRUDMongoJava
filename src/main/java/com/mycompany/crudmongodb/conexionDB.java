@@ -4,8 +4,11 @@
  */
 package com.mycompany.crudmongodb;
 
-import com.mongodb.MongoException;
+//Importacion necesaria para crear la conexion a la Base de datos de Mongo, tambien para obtener la BD seleccionada, colleciones y otros.
 import com.mongodb.client.*;
+//Manejar las excepciones del Try Catch de MongoDB
+import com.mongodb.MongoException;
+
 import com.mongodb.client.result.*;
 import static com.mongodb.client.model.Filters.*;
 import static com.mongodb.client.model.Updates.*;
@@ -20,19 +23,12 @@ import org.bson.json.JsonWriterSettings;
 import java.util.List;
 import javax.swing.JOptionPane;
 
-/**
- *
- * @author Developer
- */
 public class conexionDB {
     MongoClient conn;
     String servidor="localhost";
     Integer puerto=27017;
-
     MongoDatabase dataBaseSelect;
 
-//Catalogo de Colecciones
-    MongoCollection<Document> Equipos;
 //constructor
     public conexionDB(){
        try{
@@ -45,13 +41,18 @@ public class conexionDB {
 
    public void setBD(){
        dataBaseSelect = conn.getDatabase("dbLigaNacional");
-       System.out.println("DB Selecionada: " + dataBaseSelect.toString());
-       this.Equipos = this.dataBaseSelect.getCollection("equipos");
+       System.out.println("DB Selecionada: " + dataBaseSelect.toString());  
     }
 
-    public boolean setEquipos(Document newEquipo){
+    public MongoDatabase getDB(){
+       return dataBaseSelect;
+    }
+
+//OPERACIONES CRUD a un documento de la BD de Mongo
+
+    public boolean insertDocuments(MongoCollection<Document> collection,Document newEquipo){
        try{
-            this.Equipos.insertOne(newEquipo);
+            collection.insertOne(newEquipo);
             JOptionPane.showMessageDialog(null, "Registro creado con exito!","Importante!",JOptionPane.INFORMATION_MESSAGE);
             return true;
         }catch(MongoException error){
@@ -60,32 +61,22 @@ public class conexionDB {
         }
     }
 
-    public FindIterable<Document> getEquipos(){
+    public FindIterable<Document> getDocuments(MongoCollection<Document> collection){
         FindIterable<Document> iterable =null;
         try{
-           iterable  = this.Equipos.find();
+           iterable  = collection.find();
         }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
         }
         return iterable;
     }
 
- public FindIterable<Document> getEquipoInsertado(){
-        FindIterable<Document> iterable =null;
-        try{
-           iterable  = this.Equipos.find();
-        }catch(MongoException error){
-            JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
-        }
-        return iterable;
-    }
-
-public boolean deleteEquipos(String id){
+    public boolean deleteDocuments(MongoCollection<Document> collection,String id){
         try{
             // delete one document
             Bson filter = eq("_id",new ObjectId(id));
        //     Document doc = this.Equipos.findOneAndDelete(filter);
-            DeleteResult result = this.Equipos.deleteOne(filter);
+            DeleteResult result = collection.deleteOne(filter);
             return result.getDeletedCount()>0 ? true : false;
         }catch(MongoException error){
             JOptionPane.showMessageDialog(null, "Registro no pudo ser eliminado","Importante!", JOptionPane.ERROR_MESSAGE);
@@ -93,10 +84,10 @@ public boolean deleteEquipos(String id){
         }
 }
 
-    public boolean actualizarEquipos(Document data,String id){
+    public boolean actualizarDocuments(MongoCollection<Document> collection,Document data,String id){
             try{
                         Bson filter = eq("_id", new ObjectId(id));
-                        UpdateResult updateResult = this.Equipos.replaceOne(filter, data);
+                        UpdateResult updateResult = collection.replaceOne(filter, data);
                     return updateResult.getModifiedCount()>0 ? true : false;
             }catch(MongoException error){
                         JOptionPane.showMessageDialog(null, "Registro no pudo ser actualizado","Importante!", JOptionPane.ERROR_MESSAGE);

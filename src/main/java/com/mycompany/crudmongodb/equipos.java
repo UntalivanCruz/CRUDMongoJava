@@ -16,12 +16,20 @@ import javax.swing.JOptionPane;
  * @author Developer
  */
 public class equipos extends javax.swing.JFrame {
+    //Creando la Coleccion de Equipos
+    MongoCollection<Document> Equipos;
+
+    //Creando el modelo de la tabla
     DefaultTableModel modelEquipos;
     /**
      * Creates new form equipos
      */
     public equipos() {
         initComponents();
+    //Definiendo la coleccion equipos
+        this.Equipos = main.connMongo.getDB().getCollection("equipos");
+
+    //Definiendo la estructura de la tabla
         this.modelEquipos = new DefaultTableModel();
         this.modelEquipos.addColumn("Id");
         this.modelEquipos.addColumn("Nombre");
@@ -36,7 +44,8 @@ public class equipos extends javax.swing.JFrame {
 
     private void llenarTabla(){
         this.tblEquipos.setModel(this.modelEquipos);
-        MongoCursor<Document> cursor = main.connMongo.getEquipos().iterator();
+
+        MongoCursor<Document> cursor = main.connMongo.getDocuments(this.Equipos).iterator();
             while (cursor.hasNext()) {
                 Document documento = cursor.next();
                 System.out.println(documento);
@@ -58,7 +67,7 @@ public class equipos extends javax.swing.JFrame {
             .append("sede",txtSede.getText().toString())
             .append("fundacion", Integer.parseInt(txtFundacion.getText()));
  
-       if(main.connMongo.setEquipos(datosObj)){
+       if(main.connMongo.insertDocuments(this.Equipos,datosObj)){
            this.limpiarForm();
            this.agregarRegistrosTabla(datosObj);
         }
@@ -70,6 +79,7 @@ public class equipos extends javax.swing.JFrame {
         txtSede.setText("");
         txtNombre.requestFocus();
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -213,7 +223,7 @@ public class equipos extends javax.swing.JFrame {
 
     private void btnModificarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnModificarActionPerformed
         // TODO add your handling code here:
-int res = JOptionPane.showOptionDialog(new JFrame(), "Esta seguro que desea actualizar el registro seleccionado?", 
+        int res = JOptionPane.showOptionDialog(new JFrame(), "Esta seguro que desea actualizar el registro seleccionado?", 
                     "Confirmacion de actualizacion",
                     JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
                     new Object[] { "Si", "No" }, JOptionPane.YES_OPTION);
@@ -230,7 +240,7 @@ int res = JOptionPane.showOptionDialog(new JFrame(), "Esta seguro que desea actu
             .append("sede",this.txtSede.getText())
             .append("fundacion", Integer.parseInt(this.txtFundacion.getText()));
            
-           JOptionPane.showMessageDialog(null, main.connMongo.actualizarEquipos(datosObj,dataTabla[0])?"Registro Actualizado con exito":"Registro no pudo ser actualizado");
+           JOptionPane.showMessageDialog(null, main.connMongo.actualizarDocuments(this.Equipos,datosObj,dataTabla[0])?"Registro Actualizado con exito":"Registro no pudo ser actualizado");
           
            this.modelEquipos.setValueAt(this.txtNombre.getText(), posicion, 1);
            this.modelEquipos.setValueAt(this.txtSede.getText(), posicion, 2);
@@ -268,7 +278,7 @@ public boolean deleteTablePersonas(){
      if(posicion>=0){
         String id=this.modelEquipos.getValueAt(posicion, 0).toString();     
         this.modelEquipos.removeRow(posicion);
-        main.connMongo.deleteEquipos(id);
+        main.connMongo.deleteDocuments(this.Equipos,id);
         return true;
      }else{
         return false;

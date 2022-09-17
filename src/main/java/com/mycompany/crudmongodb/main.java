@@ -15,12 +15,18 @@ public class main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        //Crear la conexion al motor de la BD(Servidor y el puerto)
         connMongo = new conexionDB();
+        //Selecciono la BD a utilizar
         connMongo.setBD();
 
+       //Creamos la coleccion de equipos
         equipos formEquipos = new equipos();
         formEquipos.setVisible(true);
+
+       //Creamos la coleccion de jugadores
+        jugadores formJugadores = new jugadores();
+        formJugadores.setVisible(true);
     }
     
 }
