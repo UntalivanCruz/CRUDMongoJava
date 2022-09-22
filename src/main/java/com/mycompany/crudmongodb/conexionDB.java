@@ -71,6 +71,18 @@ public class conexionDB {
         return iterable;
     }
 
+    public Document getOneDocuments(MongoCollection<Document> collection, String id){
+        Document doc = null;
+        try{
+            Bson filter = eq("_id",new ObjectId(id));
+            doc = collection.find(filter).first();
+        }
+        catch(MongoException error){
+            JOptionPane.showMessageDialog(null, "Registro no pudo ser ingresado","Importante!", JOptionPane.ERROR_MESSAGE);
+        }
+        return doc;
+    }
+
     public boolean deleteDocuments(MongoCollection<Document> collection,String id){
         try{
             // delete one document
